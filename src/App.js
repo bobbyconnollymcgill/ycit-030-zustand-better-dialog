@@ -12,6 +12,7 @@ export const App = () => {
 
             <Button
                 onClick={async () => {
+                    // Now we get to do fancy stuff like this:
                     const result = await msgBoxYN("Are you sure you want to promote to admin?", "Promote to admin") // prettier-ignore
 
                     if (result === "yes") {

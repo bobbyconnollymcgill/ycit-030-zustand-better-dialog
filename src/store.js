@@ -14,16 +14,16 @@ export const useAppStore = create((set) => {
 
 export const useDialogStore = create((set, get) => {
     return {
-        result: null,
         dialogState: "closed",
 
         type: "",
         message: "",
         headerText: "",
 
+        resolve: null,
+
         open: (type, message, headerText) => {
             set({
-                result: null,
                 dialogState: "opened",
                 type,
                 message,
@@ -32,8 +32,9 @@ export const useDialogStore = create((set, get) => {
         },
 
         close: (result) => {
+            get().resolve(result)
+
             set({
-                result,
                 dialogState: "closed",
             })
         },
@@ -41,25 +42,22 @@ export const useDialogStore = create((set, get) => {
         msgBox: (message, headerText) => {
             get().open("ok", message, headerText)
 
-            return get().waitForUser()
+            // Note: we store the "resolve" into our state manager so that we can call it later (when the user clicks OK/yes/no)
+            return new Promise((resolve) => {
+                set({
+                    resolve,
+                })
+            })
         },
 
         msgBoxYN: (message, headerText) => {
             get().open("yes-no", message, headerText)
 
-            return get().waitForUser()
-        },
-
-        waitForUser: () => {
             return new Promise((resolve) => {
-                const handle = setInterval(() => {
-                    console.log("waiting for user")
-                    const result = get().result
-                    if (result !== null) {
-                        resolve(result)
-                        clearInterval(handle)
-                    }
-                }, 50)
+                // get().resolve = resolve // NOTE: this accomplishes the same thing as the line below, so I'll leave this example here for reference
+                set({
+                    resolve,
+                })
             })
         },
     }
